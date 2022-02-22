@@ -13,17 +13,24 @@ import java.util.TimerTask;
 public class FloorObject {
     private final long id;
     private final String name;
-    private final int slot;
+    private int slot;
     private double floorPrice;
+    private boolean first;
     Timer timer;
 
-    public FloorObject(long id, String name, int slot) {
+    public FloorObject(long id, String name, int slot, boolean first) {
         timer = new Timer();
         this.id = id;
         this.name = name;
         this.slot = slot;
+        this.first = first;
         getNewFloorPrice();
+        updateFloorPrice();
         startChecking();
+        if(first) {
+            this.slot--;
+            this.first = false;
+        }
     }
 
     public void getNewFloorPrice(){
@@ -40,27 +47,28 @@ public class FloorObject {
 
     public void updateFloorPrice(){
         VoiceChannel channel = BotStartup.shard.getVoiceChannelById(id);
-        String name = channel.getName();
-        String[] split = name.split(" ");
+        String channelName = channel.getName();
+        String[] split = channelName.split(" ");
 
-        split[slot -1] = String.valueOf(floorPrice);
+        split[slot] = String.valueOf(floorPrice);
         String fixedString = String.join(" ", split);
 
-        channel.getManager().setName(fixedString.replace("SOLFLOOR", "")).queue();
+        channel.getManager().setName(fixedString.replace("SOLFLOOR", "").replace(name, "")).queue();
     }
 
     public void startChecking(){
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                getFloorPrice();
+                getNewFloorPrice();
                 updateFloorPrice();
                 System.out.println("automatically saved!");
             }
-        }, 0, 60*1000*5);
+        }, 60, 60*1000*5);
     }
 
 
-
-
+    public boolean getFirst() {
+        return first;
+    }
 }

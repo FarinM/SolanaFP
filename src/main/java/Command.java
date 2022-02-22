@@ -24,13 +24,10 @@ public class Command extends ListenerAdapter {
             if(e.getChannel().getName().contains("SOLFLOOR")){
                 String[] name = e.getChannel().getName().split(" ");
                 int i = 0;
-                String floor;
                 for(String s : name){
                     if(s.equalsIgnoreCase("solfloor")){
-                        FloorObject floorObject = new FloorObject(e.getChannel().getIdLong(), name[i+1], i+1);
+                        FloorObject floorObject = new FloorObject(e.getChannel().getIdLong(), name[i+1], i+1, true);
                         BotStartup.floorObjects.put(e.getChannel().getIdLong(), floorObject);
-                        floor = String.valueOf(floorObject.getFloorPrice());
-                        e.getJDA().getVoiceChannelById(e.getChannel().getIdLong()).getManager().setName(e.getChannel().getName().replace("SOLFLOOR "+name[i+1], floor)).queue();
                         break;
                     }
                     i++;
