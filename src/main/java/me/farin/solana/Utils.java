@@ -1,3 +1,5 @@
+package me.farin.solana;
+
 public class Utils {
 
 
