@@ -16,77 +16,55 @@ public class FloorObject {
     private final long id;
     private final String name;
     private final long guildId;
-    private int slot;
-    private double floorPrice;
-    private boolean first;
+    private final int slot;
     Timer timer;
 
-    public FloorObject(long id, String name, int slot, boolean first) {
+    public FloorObject(long id, String name, int slot) {
         timer = new Timer();
         this.id = id;
         this.name = name;
         this.slot = slot;
-        this.first = first;
         this.guildId = 0L;
-        updateFloorPrice();
-        if (first) {
-            this.slot--;
-            this.first = false;
-            startChecking();
-        }
+        startChecking();
     }
 
     public double getNewFloorPrice() {
-        String response = null;
-            String fixedString = name.replaceAll(" ", "_").toLowerCase();
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder().uri(URI.create("https://api-mainnet.magiceden.dev/v2/collections/" + fixedString + "/stats")).build();
-            response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                    .thenApply(HttpResponse::body)
-                    .thenApply(Utils::parse)
-                    .thenApply(Utils::parse)
-                    .join();
+        String fixedString = name.replaceAll(" ", "_").toLowerCase();
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create("https://api-mainnet.magiceden.dev/v2/collections/" + fixedString + "/stats")).build();
+        String response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(HttpResponse::body)
+                .thenApply(Utils::parse)
+                .thenApply(Utils::parse)
+                .join();
 
         try {
-            return Double.parseDouble(Utils.parse(response));
-        } catch (NumberFormatException e){
+            return Double.parseDouble(Utils.parse(response)) / 1000000000;
+        } catch (NumberFormatException e) {
             BotStartup.floorObjects.remove(this.getId());
             return 0D;
         }
-
     }
 
     public void updateFloorPrice() {
         VoiceChannel channel = BotStartup.shard.getVoiceChannelById(id);
         String channelName = channel.getName();
         String[] split = channelName.split(" ");
-        String fixedString = String.join(" ", split);
+        split[slot] = String.valueOf(getNewFloorPrice());
+        String s = String.join(" ", split);
 
-        Double d = getNewFloorPrice();
-        floorPrice = d;
-
-        channel.getManager().setName(fixedString
-                .replaceAll("(?i)solfloor", "")
-                .replace(name, String.valueOf(d)
-                        .replace(String.valueOf(floorPrice), String.valueOf(d)))).queue();
+        channel.getManager().setName(s.replace(name, "")).queue();
     }
 
     public void startChecking() {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                updateFloorPrice();
-                if(floorPrice == 0) {
-                    timer.cancel();
-                    return;
+                if (BotStartup.shard.getVoiceChannelById(id) != null) {
+                    updateFloorPrice();
+                    System.out.println("automatically saved!");
                 }
-                System.out.println("automatically saved!");
             }
-        }, 3000, 60 * 1000 * 5);
-    }
-
-
-    public boolean getFirst() {
-        return first;
+        }, 1500, 60 * 1000 * 5);
     }
 }

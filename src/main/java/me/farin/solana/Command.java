@@ -19,7 +19,7 @@ public class Command extends ListenerAdapter {
                 int i = 0;
                 for(String s : name){
                     if(s.equalsIgnoreCase("solfloor")){
-                        FloorObject floorObject = new FloorObject(e.getChannel().getIdLong(), name[i+1], i+1, true);
+                        FloorObject floorObject = new FloorObject(e.getChannel().getIdLong(), name[i+1], i);
                         BotStartup.floorObjects.put(e.getChannel().getIdLong(), floorObject);
                         break;
                     }
@@ -34,6 +34,7 @@ public class Command extends ListenerAdapter {
         for (Map.Entry<Long,FloorObject> entry : BotStartup.floorObjects.entrySet()){
             if(entry.getKey().equals(e.getChannel().getIdLong())){
                 System.out.println(BotStartup.floorObjects.get(entry.getKey()).getName() + " has been removed");
+                BotStartup.floorObjects.get(entry.getKey()).getTimer().cancel();
                 BotStartup.floorObjects.remove(entry.getKey());
                 break;
              }
