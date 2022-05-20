@@ -6,7 +6,6 @@ import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Locale;
 import java.util.Map;
 
 public class Command extends ListenerAdapter {
@@ -19,8 +18,12 @@ public class Command extends ListenerAdapter {
                 int i = 0;
                 for(String s : name){
                     if(s.equalsIgnoreCase("solfloor")){
+                        if(!Utils.checkIfValidCollection(name[i+1]))
+                            return;
                         FloorObject floorObject = new FloorObject(e.getChannel().getIdLong(), name[i+1], i);
                         BotStartup.floorObjects.put(e.getChannel().getIdLong(), floorObject);
+
+                        BotStartup.saveData();
                         break;
                     }
                     i++;
