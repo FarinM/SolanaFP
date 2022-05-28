@@ -11,5 +11,7 @@ How do you set this up?
 
 ![image](https://user-images.githubusercontent.com/26412898/170837039-caa0a8ca-ee69-4fe9-85b5-872aa93e1039.png)
 
+Now you're all set! 👍
+
 
 
