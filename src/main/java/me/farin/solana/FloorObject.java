@@ -1,7 +1,10 @@
 package me.farin.solana;
 
 import lombok.Getter;
+import net.dv8tion.jda.api.audit.ActionType;
+import net.dv8tion.jda.api.audit.AuditLogEntry;
 import net.dv8tion.jda.api.entities.VoiceChannel;
+import net.dv8tion.jda.api.exceptions.MissingAccessException;
 import org.json.JSONObject;
 
 import java.net.URI;
@@ -10,6 +13,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 
 @Getter
@@ -52,7 +56,22 @@ public class FloorObject {
         split[slot] = String.valueOf(getNewFloorPrice());
         String s = String.join(" ", split);
 
-        channel.getManager().setName(s.replace(name, "")).queue();
+        try {
+            channel.getManager().setName(s.replace(name, "")).queue();
+        } catch (MissingAccessException exception){
+            channel.getGuild().retrieveAuditLogs().queueAfter(1, TimeUnit.SECONDS, (logs) -> {
+                for(AuditLogEntry log : logs){
+                    if(log.getType().equals(ActionType.CHANNEL_CREATE)){
+                        String b = Utils.parseId(log.toString());
+                        if(Long.parseLong(b) - 1 == channel.getIdLong()){
+                            log.getUser().openPrivateChannel().flatMap(dm -> dm.sendMessage("Invalid Permissions - Read the readme file https://github.com/FarinM/SolanaFP")).queue();
+                        }
+
+                    }
+                }
+            });
+        }
+
     }
 
     public void startChecking() {
