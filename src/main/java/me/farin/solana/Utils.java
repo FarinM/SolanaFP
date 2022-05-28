@@ -20,6 +20,21 @@ public class Utils {
         return responsebody;
     }
 
+
+    public static String parseId(String responsebody){
+        String[] strings = responsebody.split(" ");
+        for(String s : strings){
+            if(s.contains("ALE:CHANNEL_CREATE(ID:")){
+                String[] split = s.split(":");
+                return split[2];
+            }
+        }
+
+        return responsebody;
+    }
+
+
+
     public static boolean checkIfValidCollection(String name){
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create("https://api-mainnet.magiceden.dev/v2/collections/" + name + "/stats")).build();
