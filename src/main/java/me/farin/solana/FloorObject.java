@@ -53,7 +53,7 @@ public class FloorObject {
         VoiceChannel channel = BotStartup.shard.getVoiceChannelById(id);
         String channelName = channel.getName();
         String[] split = channelName.split(" ");
-        split[slot] = String.valueOf(getNewFloorPrice());
+        split[slot] = String.valueOf(this.getNewFloorPrice());
         String s = String.join(" ", split);
 
         try {

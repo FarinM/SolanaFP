@@ -21,8 +21,20 @@ public class Events extends ListenerAdapter {
                 int i = 0;
                 for(String s : name){
                     if(s.equalsIgnoreCase("solfloor")){
-                        if(!Utils.checkIfValidCollection(name[i+1]))
+                        if(!Utils.checkIfValidCollection(name[i+1])){
+                            e.getGuild().retrieveAuditLogs().queueAfter(1, TimeUnit.SECONDS, (logs) -> {
+                                for(AuditLogEntry log : logs){
+                                    if(log.getType().equals(ActionType.CHANNEL_CREATE)){
+                                        String b = Utils.parseId(log.toString());
+                                        if(Long.parseLong(b) - 1 == e.getChannel().getIdLong()){
+                                            log.getUser().openPrivateChannel().flatMap(channel -> channel.sendMessage("Invalid Collection! To get the correct Colletion name, follow the image "  )).queue();
+                                        }
+
+                                    }
+                                }
+                            });
                             return;
+                        }
                         FloorObject floorObject = new FloorObject(e.getChannel().getIdLong(), name[i+1], i);
                         BotStartup.floorObjects.put(e.getChannel().getIdLong(), floorObject);
                         BotStartup.saveData();
