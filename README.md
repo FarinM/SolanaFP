@@ -9,6 +9,8 @@ How do you set this up?
 
 ![image](https://user-images.githubusercontent.com/26412898/170837027-01683fbb-ce07-437e-a2b8-055a75a6f930.png)
 
+![image](https://user-images.githubusercontent.com/26412898/173073333-84d69b6a-6960-4770-b667-c98bbf1b234d.png)
+
 ![image](https://user-images.githubusercontent.com/26412898/170837039-caa0a8ca-ee69-4fe9-85b5-872aa93e1039.png)
 
 Now you're all set! 👍
