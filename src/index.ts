@@ -18,30 +18,33 @@ client.on('ready', () => {
 connectDB()
 
 client.on("channelCreate", async (channel) => {
-    if(channel instanceof VoiceChannel) {
+    if (channel instanceof VoiceChannel) {
         const name = channel.name.toLocaleLowerCase()
         const split = name.split(" ")
         const collectionIndex = split.indexOf("solfloor")
-        const collectionName = split[collectionIndex + 1] 
+        console.log(collectionIndex)
+        const collectionName = split[collectionIndex + 1]
 
-        if(name.includes("solfloor") && collectionIndex) {
+        if (name.includes("solfloor") && collectionIndex != null) {
             split[collectionIndex] = ""
-            split[collectionIndex + 1] = ""
-            const newName = split.join(" ") 
+            split[collectionIndex + 1] = "..."
+            const newName = split.join(" ")
             channel.setName(newName)
-
             const floor = new FloorClass(collectionIndex, collectionName, channel.id)
-            activeChannels.push(floor)
-            floor.startInterval()
-            await saveChannel(channel.id, collectionIndex, collectionName)
+
+            if (await floor.fetchPrice()) {
+                floor.startInterval()
+                activeChannels.push(floor)
+                await saveChannel(channel.id, collectionIndex, collectionName)
+            }
         }
     }
 })
 
 client.on('channelDelete', async (channel) => {
-    if(await findChannel(channel.id)) {
+    if (await findChannel(channel.id)) {
         const active = activeChannels.find((x) => x.channelId === channel.id)
-        if(active) {
+        if (active) {
             clearInterval(active.interval)
         }
 
@@ -51,16 +54,18 @@ client.on('channelDelete', async (channel) => {
 
 const loadData = async () => {
     const channels = await getAllChannels()
-    console.log(channels)
+    console.log(channels.length)
 
-    for(const channel of channels) {
-        const discordChannel = client.channels.cache.get(channel.channelId)
-        if(!discordChannel) {
+    for (const channel of channels) {
+        const discordChannel = await client.channels.fetch(channel.channelId).catch(err => { console.log("channel does not exist") })
+        if (!discordChannel) {
             await removeChannel(channel.channelId)
         } else {
             const floor = new FloorClass(channel.collectionIndex!, channel.collectionName!, channel.channelId)
-            floor.startInterval()
-            activeChannels.push(floor)
+            if (await floor.fetchPrice()) {
+                floor.startInterval()
+                activeChannels.push(floor)
+            }
         }
         await sleep(3000)
     }
